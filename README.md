@@ -1,12 +1,14 @@
 > This repo is still Worki-In-Progress 🕰️
 
 # Feeds-For-Nitter
-Create and manage Nitter feeds.
+Create and manage anonymous Nitter feeds.
 
 ### Features:
 - [x] Create and manage Nitter feeds.
 - [x] Directly visit the Nitter feed.
 - [x] Create feeds for different uses. 
+- [x] 100% anonymous.
+- [x] Multiplatform, syncs everywhere.
 
 ### Screenshots:
 
