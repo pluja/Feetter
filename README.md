@@ -20,11 +20,11 @@ Create and manage anonymous Nitter feeds.
 ![My Feeds](https://i.imgur.com/MrzVpyt.png)
 
 
-### Built with
+## Built with
 
 ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![HTML](https://img.shields.io/badge/HTML-239120?style=for-the-badge&logo=html5&logoColor=white)
 ![Sanic](https://img.shields.io/badge/-SANIC-ff69b4?style=for-the-badge)
 
 
-### [Support](https://github.com/pluja/pluja/blob/main/SUPPORT.md)
+## [Support](https://github.com/pluja/pluja/blob/main/SUPPORT.md)
