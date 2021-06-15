@@ -29,9 +29,9 @@ app = Sanic.get_app("NitterFeeds")
 
 FOOTER = """<footer class="container">
 <mark>by <a href="https://github.com/pluja">Pluja</a>.</mark> <br>
-<kbd>xmr: of02ij30jf0ajs0idjf0jq0fj0ejf0j0dwfji0ajdifjsafijsodfjoasj0fjasdfjasjdf0jqifj0J</kbd><br>
-<kbd>btc: bc1920jf0aisjdfdwklfjalskjflas</kbd><br>
-<kbd>eth: 0x1d9f9jf939jf9as9</kbd>
+xmr: <kbd>83czvTQL5cHXZZpRM6bvcqVZSbNRqsX1tMwWnx1HjKBUD8swxUm9fFiTHUZbfYg8qPLM4nLwSdGCM1JmAXUp886KG93Pccr</kbd><br>
+btc: <kbd>bc1qnrh67j3q0y8kzsxl9npgrlqhalcgx4awa3j2u0</kbd><br>
+ltc: <kbd>MMSW3AnzHbxnmVeXzGjnNgHf6h62qpR9VA</kbd>
 </footer>"""
 
 nitterInstances = ["nitter.fdn.fr", "tweet.lambda.dance", "nitter.kavin.rocks", "nitter.42l.fr"]
