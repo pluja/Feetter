@@ -11,10 +11,11 @@ Create and manage anonymous Nitter feeds with a simple and fast web interface.
 - [x] No JS, No Cookies, No tracking. Just a random username.
 - [x] Multiplatform, syncs everywhere.
 
-## Usage:
+## Test it:
 
 1. Clone this repo.
 2. Install python dependencies.
+3. `mkdir data`
 3. Run `sanic server.app`
 4. Visit http://127.0.0.1:8000
 
