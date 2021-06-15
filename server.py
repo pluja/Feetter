@@ -34,12 +34,12 @@ btc: <kbd>bc1qnrh67j3q0y8kzsxl9npgrlqhalcgx4awa3j2u0</kbd><br>
 ltc: <kbd>MMSW3AnzHbxnmVeXzGjnNgHf6h62qpR9VA</kbd>
 </footer>"""
 
-nitterInstances = ["nitter.fdn.fr", "tweet.lambda.dance", "nitter.kavin.rocks", "nitter.42l.fr"]
+nitterInstances = ["nitter.fdn.fr", "tweet.lambda.dance", "nitter.42l.fr", "nitter.r3d.red", "nitter.eu", "nitter.kavin.rocks"]
 
 sampleFeed = """{
                   "feeds": [
                     {
-                      "name": "Example Feed",
+                      "name": "Example",
                       "users": [
                         "monero",
                         "snowden",
@@ -49,31 +49,17 @@ sampleFeed = """{
                   ]
                 }"""
 
-'''
-@app.on_request
-async def run_before_handler(request):
-    request.ctx.user = await fetch_user_by_token(request.token)
-
-@app.route('/hi')
-async def hi_my_name_is(request):
-    return text("Hi, my name is {}".format(request.ctx.user.name))
-'''
-
 app.static("/static", "./static")
 
 filename = ""
-
-@app.on_request
-async def setup_before_request(request):
-    pass
 
 @app.route("/", name="index")
 @app.route("/index", name="index")
 async def handler(request):
     #random_username = random_username.generate.generate_username()
     errorHTML = ""
-    args = request.args
-    if(args):
+    if(request.args):
+        args = request.args
         err=args.get("error")
         errorHTML = f"<h6 color='red' style='color:red;'> > Error: {err} not valid"
 
@@ -81,11 +67,13 @@ async def handler(request):
     ls = os.listdir('data')
     usercount = len(ls)
 
-    username = petname.Generate(3, "-")
-
+    # Generate a random username
+    username = petname.Generate(3, "-", 10)
+    # If username exists generate another until its unexistent
     while f'{username}.json' in ls:
-        username = petname.Generate(3, "-")
+        username = petname.Generate(3, "-", 10)
 
+    #Main page HTML
     return html(f"""
                     <html lang="en" data-theme="dark">
                       <head>
@@ -114,16 +102,17 @@ async def handler(request):
                         </header>
                       </body
                      </html>
-                """) #Main page HTML
+                """)
 
 @app.get("/edit")
 @app.get("/edit/<username>/<feedname>")
 async def edit(request, username=None, feedname=None):
-    args = request.args
-    if(args):
+    if(request.args):
+        args = request.args
         username=args.get("username")
         feedname=args.get("feedname")
 
+    feedname = unquote(feedname).replace("+", " ")
     filename = f"data/{username}.json"
     with open(filename, 'r') as userFeedFile:
         userFeedJson = json.load(userFeedFile)
@@ -142,11 +131,9 @@ async def edit(request, username=None, feedname=None):
         tableClosing = """</tbody>
                         </table>
                        """
-
-        tableContent=""
-
-        ## GENERATE EDIT TABLE
+        ## CHECK IF FEED EXISTS AND GENERATE EDIT TABLE
         exists = False
+        tableContent=""
         for feed in userFeedJson["feeds"]:
             if feed["name"] != feedname:
                 continue
@@ -154,18 +141,17 @@ async def edit(request, username=None, feedname=None):
                 exists = True
                 i = 1
                 for user in feed["users"]:
+                    instance = nitterInstances[randrange(0, len(nitterInstances))]
                     tableContent+=f"""
                                     <tr>
                                     <th scope="row">{i}</th>
-                                    <td>@{user}</td>
-                                    <td><a href="">❌</a></td>
+                                    <td><a href="https://{instance}/{user}" target="_blank">@{user}</a></td>
+                                    <td><a href="/delete/{username}/{feedname}/{user}">❌</a></td>
                                     </tr>
                                   """
                     i+=1
-
         ## CREATE TABLE HTML
         table = tableHead+tableContent+tableClosing
-
         if exists:
             ## RETURN FEED EDIT PAGE
             return html(f"""
@@ -177,7 +163,10 @@ async def edit(request, username=None, feedname=None):
                               </head>
                               <body>
                                 <main class="container">
-                                    <h2> Editing <a href="/user/{username}"><kbd>{username}</kbd></a> <b>{feedname}</b> feed</h2>
+                                    <hgroup>
+                                    <h2> Editing <a href="/user/{username}"><kbd>{username}</kbd></a> '{feedname}' feed</h2>
+                                    <h4> {i-1}/30 users in this feed </h4>
+                                    </hgroup>
                                     {table}
                                 </main>
                                 {FOOTER}
@@ -202,7 +191,7 @@ async def edit(request, username=None, feedname=None):
                         """)
 
 def validUser(username):
-    return (re.match("^[a-z]+?\-+[a-z]+?\-+[a-z]+?\*?$|^\*$", username))
+    return (re.match("^[a-z]+?\-+[a-z]+?\-+[a-z]+?\*?$|^\*$", username) and len(username)<31)
 
 # http://127.0.0.1:8000/user/1234?key1=val1&key2=val2&key3=val3
 @app.get("/user")
@@ -355,11 +344,3 @@ async def newfeed(request, username=None, newFeedName=None, usernames=None):
         return redirect(url)
     #dataJson = json.dumps(dataJson)
     return text(dataJson)
-
-@app.route("/cookie")
-async def test(request):
-    response = text("There's a cookie up in this response")
-    response.cookies["test"] = "It worked!"
-    response.cookies["test"]["domain"] = ".yummy-yummy-cookie.com"
-    response.cookies["test"]["httponly"] = True
-    return response
