@@ -23,6 +23,9 @@ Create and manage anonymous Nitter feeds with a simple and fast web interface.
 
 - [ ] Delete a feed
 - [ ] Delete a user from a feed
+- [ ] Edit a feed: Add users
+- [ ] Edit a feed: Remove users
+- [ ] Edit a feed: Change name
 - [ ] Export data as json file
 - [ ] Import data from json file
 - [ ] Save tweets via URL and display them
