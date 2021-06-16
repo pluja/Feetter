@@ -117,7 +117,7 @@ async def edit(request, username=None, feedname=None):
 
     resultHTML = ""
     if result == "deleted":
-        resultHTML = f"<h6 color='green' style='color:green;'> > User deleted."
+        resultHTML = f"<h6 color='green' style='color:green;'> > User deleted.</h6>"
 
     feedname = unquote(feedname).replace("+", " ")
     filename = f"data/{username}.json"
@@ -176,6 +176,15 @@ async def edit(request, username=None, feedname=None):
                                     <h4> {i-1}/30 users in this feed </h4>
                                     </hgroup>
                                     {table}
+                                    <form action="/adduser/{username}/{feedname}" method="post">
+                                        <div class="grid">
+                                            <label for="firstname">
+                                                Add user
+                                                <input type="text" id="username" name="username" placeholder="@username" required>
+                                            </label>
+                                        </div>
+                                        <button class="secondary" type="submit">+ Add</button>
+                                    </form>
                                 </main>
                                 {FOOTER}
                               </body
@@ -208,6 +217,7 @@ async def delete(request, username=None, fromFeed=None):
     args = request.args
     if(args):
         toDelete=args.get("deleteUser")
+        userAction=args.get("userAction")
     try:
         with open(filename, 'r') as userFeedFile:
             pass
@@ -217,13 +227,15 @@ async def delete(request, username=None, fromFeed=None):
 
     if toDelete: # We want to dete a user
         with open(filename, 'r+') as userFeedFile:
-            userFeedJson = json.load(userFeedFile)
             i = 0
+            userFeedJson = json.load(userFeedFile)
             for feed in userFeedJson["feeds"]:
                 if feed["name"] == fromFeed and toDelete in feed["users"]:
                     # Delete user from feed.
                     feed["users"].pop(feed["users"].index(toDelete))
+                    # Set the result status
                     result="deleted"
+                    # If no users in feed, delete the feed
                     if len(feed["users"]) == 0:
                         userFeedJson["feeds"].pop(i)
                         result = "feed with 0 users deleted"
@@ -237,18 +249,25 @@ async def delete(request, username=None, fromFeed=None):
                     return redirect(url)
                 ++i
     else: #Whole feed
-        return text("This is a whole feed!")
+        if userAction == "True":
+            with open(filename, 'r+') as userFeedFile:
+                userFeedJson = json.load(userFeedFile)
+                for feed in userFeedJson["feeds"]:
+                    if feed["name"] == fromFeed:
+                        userFeedJson["feeds"].remove(feed)
+                        # Replace JSON file
+                        userFeedFile.seek(0)
+                        json.dump(userFeedJson, userFeedFile, indent=2)
+                        # Deal with smaller data.
+                        userFeedFile.truncate()
+                        url = app.url_for(f"user", username=username, result=f"delete {fromFeed} feed OK.")
+                        return redirect(url)
+        return text("Oops! Something went wrong! Error in /delete")
 
 # http://127.0.0.1:8000/user/1234?key1=val1&key2=val2&key3=val3
 @app.get("/user")
 @app.get("/user/<username>", name="user")
 async def user(request, username=None):
-    '''
-    async with httpx.AsyncClient() as client:
-        r = await client.get('https://fsf.org/')
-        print(r.status_code)
-        headers = r.headers
-    '''
     args = request.args
     result = None
     if(args):
@@ -256,6 +275,9 @@ async def user(request, username=None):
         if args.get("result"):
             result=args.get("result")
 
+    resultHTML = ""
+    if result != None:
+        resultHTML = f"<h6 color='green' style='color:green;'> > {result}. </h6>"
         '''
         print(request.args)
         print(args.get("username"))
@@ -301,7 +323,7 @@ async def user(request, username=None):
                           <p>{snippet}</p>
                           <a href='{baseUrl}' role='button' class='outline' target="_blank">Open Feed</a>
                           <a href='/edit/{username}/{feed["name"]}' role='button' class='contrast outline'>Edit Feed</a>
-                          <a href='#' role='button' class='secondary outline'>Delete Feed</a>
+                          <a href='/delete/{username}/{feed["name"]}?userAction=True' role='button' class='secondary outline'>Delete Feed</a>
                         </article></a>
 
                         """
@@ -326,10 +348,10 @@ async def user(request, username=None):
                   """
 
         if result == 1:
-            resultHTML = f"<h6 color='green' style='color:green;'> > Feed has been added."
+            resultHTML = f"<h6 color='green' style='color:green;'> > Feed has been added.</h6>"
         else:
             if result == 0:
-                errorHTML = f"<h6 color='red' style='color:red;'> > Error adding feed."
+                errorHTML = f"<h6 color='red' style='color:red;'> > Error adding feed.</h6>"
 
         return html(f"""
                         <html lang="en" data-theme="dark">
@@ -340,6 +362,7 @@ async def user(request, username=None):
                           </head>
                           <body>
                             <main class="container">
+                                {resultHTML}
                                 <hgroup>
                                 <h2> <a href="/user/{username}"><kbd>{username}</kbd></a> Feeds</h2>
                                 <h6 style="font-size: .7em;">*Save your profile with <a href="/user/{username}">this link</a></h6>
@@ -352,6 +375,27 @@ async def user(request, username=None):
                           </body
                          </html>
                     """)
+
+@app.post("/adduser/<username>/<feed>")
+async def newfeed(request, username=None, feed=None):
+    body = unquote(request.body.decode())
+    regx = r"[^a-zA-Z0-9-\--\._,]"
+    newFeedUser = re.sub(regx, '', body.split("=")[1])
+
+    filename = f"data/{username}.json"
+    with open(filename, 'r+') as userFeedFile:
+        userFeedJson = json.load(userFeedFile)
+        for f in userFeedJson["feeds"]:
+            if feed == f["name"]:
+                if not newFeedUser in f["users"]:
+                    f["users"].append(newFeedUser)
+                    # Replace JSON file
+                    userFeedFile.seek(0)
+                    json.dump(userFeedJson, userFeedFile, indent=2)
+                    # Deal with smaller data.
+                    userFeedFile.truncate()
+                    url = app.url_for("edit", username=username, feedname=feed, result=f"{newFeedUser} was added.")
+    return redirect(url)
 
 @app.post("/newfeed/<username>")
 async def newfeed(request, username=None, newFeedName=None, usernames=None):
@@ -385,7 +429,7 @@ async def newfeed(request, username=None, newFeedName=None, usernames=None):
 
             userFeedFile.seek(0)
             json.dump(userFeedJson, userFeedFile, indent=2)
-            url = app.url_for("user", username=username, result=1)
+            url = app.url_for("user", username=username, result=f"{newFeedName} created")
             return redirect(url)
     except:
         url = app.url_for("user", result=0)
