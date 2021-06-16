@@ -194,7 +194,7 @@ async def delete(request, username=None, fromFeed=None):
 async def user(request, username=None):
     template = env.get_template('user.html')
     args = request.args
-    result = None
+    result = False
     if(args):
         username=args.get("username")
         if args.get("result"):

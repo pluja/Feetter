@@ -8,7 +8,8 @@
     <main class="container">
         {% if result == 0 %}
           <h6 color='red' style='color:red;'> > {{data['result']}} </h6>
-        {% else %}
+        {%endif%}
+        {% if result %}
           <h6 color='green' style='color:green;'> > {{data['result']}} </h6>
         {% endif %}
         <hgroup>
