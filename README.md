@@ -45,7 +45,7 @@ Create and manage anonymous Nitter feeds with a simple and fast web interface.
 ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![HTML](https://img.shields.io/badge/HTML-239120?style=for-the-badge&logo=html5&logoColor=white)
 ![Sanic](https://img.shields.io/badge/-SANIC-ff69b4?style=for-the-badge)
-![Sanic](https://img.shields.io/badge/-SANIC-B41717?style=for-the-badge&logo=jinja)
+![Jinja2](https://img.shields.io/badge/-Jinja2-B41717?style=for-the-badge&logo=jinja)
 
 
 ## [Support](https://github.com/pluja/pluja/blob/main/SUPPORT.md)
