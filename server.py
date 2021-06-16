@@ -22,15 +22,6 @@ from urllib.parse import unquote
 env = Environment(loader=PackageLoader('server','templates'))
 
 app = Sanic("NitterFeeds")
-app.config.DB_NAME = 'NitterFeeds'
-app.config['DB_USER'] = 'nitterfeeds'
-
-db_settings = {
-    'DB_HOST': 'localhost',
-    'DB_NAME': 'NitterFeeds',
-    'DB_USER': 'nitterfeeds'
-}
-app.config.update(db_settings)
 
 app = Sanic.get_app("NitterFeeds")
 
