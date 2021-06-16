@@ -1,0 +1,29 @@
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="/static/css/pico.min.css">
+    <title>My Feeds</title>
+  </head>
+    <body>
+    <header class="container">
+        {% if data['error'] %}
+          <h6 style="color:green;"> > Error: {{data['error']}}</h6>
+        {% endif %}
+        <h4> We have {{data['usercount']}} users! </h4>
+        <p>
+            <u>This is your new username:</u> <kbd>{{data['username']}}</kbd>
+            <br>
+            <small>Use your own if you already have one.</small>
+        </p>
+
+        <form action="/user" method="get">
+          <label for="email">Enter a valid username</label>
+          <input type="text" id="username" name="username" value={{data['username']}} required>
+          <small>Save this username to recover your data anywhere</small>
+
+          <!-- Button -->
+          <button class="outline" type="submit">Start feeding</button>
+        </form>
+    </header>
+  </body>
+</html>

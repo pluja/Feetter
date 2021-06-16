@@ -1,3 +1,4 @@
 petname
 httpx
 sanic
+jinja2

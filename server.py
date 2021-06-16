@@ -3,6 +3,9 @@ from sanic import Sanic
 from sanic.response import text
 from sanic.response import html
 from sanic.response import redirect
+from sanic.response import html
+
+from jinja2 import Environment, PackageLoader
 
 import httpx
 import json
@@ -13,8 +16,9 @@ import petname
 
 from urllib.parse import unquote
 
-app = Sanic("NitterFeeds")
+env = Environment(loader=PackageLoader('server','templates'))
 
+app = Sanic("NitterFeeds")
 app.config.DB_NAME = 'NitterFeeds'
 app.config['DB_USER'] = 'nitterfeeds'
 
@@ -56,13 +60,13 @@ filename = ""
 @app.route("/", name="index")
 @app.route("/index", name="index")
 async def handler(request):
+    template = env.get_template('index.html')
     #random_username = random_username.generate.generate_username()
     errorHTML = ""
+    err = False
     if(request.args):
         args = request.args
         err=args.get("error")
-        errorHTML = f"<h6 color='red' style='color:red;'> > Error: {err} not valid"
-
 
     ls = os.listdir('data')
     usercount = len(ls)
@@ -74,35 +78,18 @@ async def handler(request):
         username = petname.Generate(3, "-", 10)
 
     #Main page HTML
-    return html(f"""
-                    <html lang="en" data-theme="dark">
-                      <head>
-                        <meta charset="utf-8">
-                        <link rel="stylesheet" href="/static/css/pico.min.css">
-                        <title>My Feeds</title>
-                      </head>
-                      <body>
-                        <header class="container">
-                            {errorHTML}
-                            <h4> We have {usercount} users! </h4>
-                            <p>
-                                <u>Pick this new username:</u> <kbd>{username.lower()}</kbd>
-                                <br>
-                                <small>Copy and save this username to recover your data</small>
-                            </p>
+    if err:
+        data = {'usercount': usercount,
+                'username': username.lower(),
+                'error':err
+               }
+    else:
+        data = {'usercount': usercount,
+                'username': username.lower(),
+                'error':False
+               }
 
-                            <form action="/user" method="get">
-                              <label for="email">Enter a valid username</label>
-                              <input type="text" id="username" name="username" value={username.lower()} required>
-                              <small>A username is not active until it has at least one feed.</small>
-
-                              <!-- Button -->
-                              <button class="outline" type="submit">Start feeding</button>
-                            </form>
-                        </header>
-                      </body
-                     </html>
-                """)
+    return html(template.render(data=data))
 
 @app.get("/edit", name="edit")
 @app.get("/edit/<username>/<feedname>")
