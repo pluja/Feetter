@@ -6,6 +6,9 @@ from sanic.response import redirect
 from sanic.response import html
 
 from jinja2 import Environment, PackageLoader
+from bs4 import BeautifulSoup
+from simpleicons.all import icons
+
 
 import httpx
 import json
@@ -31,11 +34,11 @@ app.config.update(db_settings)
 
 app = Sanic.get_app("NitterFeeds")
 
-FOOTER = """<footer class="container">
-<mark>by <a href="https://github.com/pluja">Pluja</a>.</mark> <br>
-xmr: <kbd>83czvTQL5cHXZZpRM6bvcqVZSbNRqsX1tMwWnx1HjKBUD8swxUm9fFiTHUZbfYg8qPLM4nLwSdGCM1JmAXUp886KG93Pccr</kbd><br>
-btc: <kbd>bc1qnrh67j3q0y8kzsxl9npgrlqhalcgx4awa3j2u0</kbd><br>
-ltc: <kbd>MMSW3AnzHbxnmVeXzGjnNgHf6h62qpR9VA</kbd>
+FOOTER = f"""<footer class="container">
+<pre>by <a href="https://github.com/pluja">Pluja</a>.</pre> <br>
+    <b style="font-size:.6em; color:#FB8537;"> <img style="width:2%;" src="https://web.getmonero.org/press-kit/symbols/monero-symbol-480.png"><mark>xmr:</mark> 83czvTQL5cHXZZpRM6bvcqVZSbNRqsX1tMwWnx1HjKBUD8swxUm9fFiTHUZbfYg8qPLM4nLwSdGCM1JmAXUp886KG93Pccr</b><br>
+    <b style="font-size:.6em; color:#1372A4;"> <mark>Ł (ltc):</mark> MMSW3AnzHbxnmVeXzGjnNgHf6h62qpR9VA</b></br>
+    <b style="font-size:.6em; color:#FEAC48;"> <mark>₿ (btc):</mark> bc1qnrh67j3q0y8kzsxl9npgrlqhalcgx4awa3j2u0</b><br>
 </footer>"""
 
 nitterInstances = ["nitter.fdn.fr", "tweet.lambda.dance", "nitter.42l.fr", "nitter.r3d.red", "nitter.eu", "nitter.kavin.rocks"]
@@ -252,6 +255,7 @@ async def delete(request, username=None, fromFeed=None):
 @app.get("/user")
 @app.get("/user/<username>", name="user")
 async def user(request, username=None):
+    template = env.get_template('user.html')
     args = request.args
     result = None
     if(args):
@@ -259,21 +263,11 @@ async def user(request, username=None):
         if args.get("result"):
             result=args.get("result")
 
-    resultHTML = ""
-    if result != None:
-        resultHTML = f"<h6 color='green' style='color:green;'> > {result}. </h6>"
-        '''
-        print(request.args)
-        print(args.get("username"))
-        print(request.args.getlist("key1"))
-        print(request.query_args)
-        print(request.query_string)
-        '''
-
     filename = f"data/{username}.json"
     try:
         with open(filename, 'r') as userFeedFile:
             pass
+
     except:
         if validUser(username):
             with open(filename, 'w') as userFeedFile:
@@ -309,56 +303,15 @@ async def user(request, username=None):
                           <a href='/edit/{username}/{feed["name"]}' role='button' class='contrast outline'>Edit Feed</a>
                           <a href='/delete/{username}/{feed["name"]}?userAction=True' role='button' class='secondary outline'>Delete Feed</a>
                         </article></a>
-
                         """
 
-        newFeedCreatorHtml = f"""<details>
-                        <summary>Create new feed</summary>
-                        <div class="grid">
-                          <form action="/newfeed/{username}" method="post" id="json">
-                            <label for="usernames">
-                              Usernames
-                              <input type="text" id="usernames" name="usernames" placeholder="@monero, @signalapp" required>
-                            </label>
-
-                            <label for="feedname">
-                              Feed Name
-                              <input type="text" id="feedname" name="feedname" placeholder="Privacy Feed" required>
-                            </label>
-                          </div>
-                          <button type="submit" class="contrast">Create</button>
-                        </form>
-                      </details>
-                  """
-
-        if result == 1:
-            resultHTML = f"<h6 color='green' style='color:green;'> > Feed has been added.</h6>"
-        else:
-            if result == 0:
-                errorHTML = f"<h6 color='red' style='color:red;'> > Error adding feed.</h6>"
-
-        return html(f"""
-                        <html lang="en" data-theme="dark">
-                          <head>
-                            <meta charset="utf-8">
-                            <link rel="stylesheet" href="/static/css/pico.min.css">
-                            <title>My Feeds</title>
-                          </head>
-                          <body>
-                            <main class="container">
-                                {resultHTML}
-                                <hgroup>
-                                <h2> <a href="/user/{username}"><kbd>{username}</kbd></a> Feeds</h2>
-                                <h6 style="font-size: .7em;">*Save your profile with <a href="/user/{username}">this link</a></h6>
-                                </hgroup>
-
-                                {newFeedCreatorHtml}
-                                {feedCards}
-                            </main>
-                            {FOOTER}
-                          </body
-                         </html>
-                    """)
+        data = {
+                "username":username,
+                "result":result,
+                "feedCards":BeautifulSoup(feedCards),
+                "footer":FOOTER
+        }
+        return html(template.render(data=data))
 
 @app.post("/adduser/<username>/<feed>")
 async def newfeed(request, username=None, feed=None):

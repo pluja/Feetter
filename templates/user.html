@@ -1,0 +1,42 @@
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="/static/css/pico.min.css">
+    <title>My Feeds</title>
+  </head>
+  <body>
+    <main class="container">
+        {% if result == 0 %}
+          <h6 color='red' style='color:red;'> > {{data['result']}} </h6>
+        {% else %}
+          <h6 color='green' style='color:green;'> > {{data['result']}} </h6>
+        {% endif %}
+        <hgroup>
+        <h2> <a href="/user/{{data['username']}}"><kbd>{{data['username']}}</kbd></a> Feeds</h2>
+        <h6 style="font-size: .7em;">*Save your profile with <a href="/user/{{data['username']}}">this link</a></h6>
+        </hgroup>
+
+        <details>
+          <summary>Create new feed</summary>
+          <form action="/newfeed/{{data['username']}}" method="post" id="json">
+              <div class="grid">
+                <label for="usernames">
+                  Usernames
+                  <input type="text" id="usernames" name="usernames" placeholder="@monero, @signalapp" required>
+                </label>
+
+                <label for="feedname">
+                  Feed Name
+                  <input type="text" id="feedname" name="feedname" placeholder="Privacy Feed" required>
+                </label>
+              </div>
+          </form>
+          <button type="submit" class="contrast">Create</button>
+        </details>
+        {% for card in data['feedCards'] %}
+          {{card | safe}}
+        {% endfor %}
+    </main>
+    {{data['footer']}}
+  </body
+ </html>
