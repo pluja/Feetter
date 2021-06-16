@@ -19,6 +19,19 @@ Create and manage anonymous Nitter feeds with a simple and fast web interface.
 3. Run `sanic server.app`
 4. Visit http://127.0.0.1:8000
 
+## Roadmap
+
+- [ ] Delete a feed
+- [ ] Delete a user from a feed
+- [ ] Edit a feed: Add users
+- [ ] Edit a feed: Remove users
+- [ ] Edit a feed: Change name
+- [ ] Export data as json file
+- [ ] Import data from json file
+- [ ] Save tweets via URL and display them
+- [ ] Autodelete empty users
+- [ ] Display feed tweets in app from rss (less data)
+
 ## Screenshots:
 
 ### Create new feed:
