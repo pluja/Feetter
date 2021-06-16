@@ -40,8 +40,7 @@ sampleFeed = """{
                       "name": "Example",
                       "users": [
                         "monero",
-                        "snowden",
-                        "bitcoin"
+                        "snowden"
                       ]
                     }
                   ]
@@ -91,31 +90,12 @@ async def edit(request, username=None, feedname=None):
         feedname=args.get("feedname")
         result = args.get("result")
     else:
-        result = None
-
-    resultHTML = ""
-    if result == "deleted":
-        resultHTML = f"<h6 color='green' style='color:green;'> > User deleted.</h6>"
+        result = False
 
     feedname = unquote(feedname).replace("+", " ")
     filename = f"data/{username}.json"
     with open(filename, 'r') as userFeedFile:
         userFeedJson = json.load(userFeedFile)
-        tableHead = """
-                    <table>
-                      <thead>
-                        <tr>
-                          <th scope="col">#</th>
-                          <th scope="col">Username</th>
-                          <th scope="col">Action</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                    """
-
-        tableClosing = """</tbody>
-                        </table>
-                       """
         ## CHECK IF FEED EXISTS AND GENERATE EDIT TABLE
         exists = False
         tableContent=""
@@ -135,55 +115,21 @@ async def edit(request, username=None, feedname=None):
                                     </tr>
                                   """
                     i+=1
-        ## CREATE TABLE HTML
-        table = tableHead+tableContent+tableClosing
         if exists:
             ## RETURN FEED EDIT PAGE
-            return html(f"""
-                            <html lang="en" data-theme="dark">
-                              <head>
-                                <meta charset="utf-8">
-                                <link rel="stylesheet" href="/static/css/pico.min.css">
-                                <title>My Feeds</title>
-                              </head>
-                              <body>
-                                <main class="container">
-                                    {resultHTML}
-                                    <hgroup>
-                                    <h2> Editing <a href="/user/{username}"><kbd>{username}</kbd></a> '{feedname}' feed</h2>
-                                    <h4> {i-1}/30 users in this feed </h4>
-                                    </hgroup>
-                                    {table}
-                                    <form action="/adduser/{username}/{feedname}" method="post">
-                                        <div class="grid">
-                                            <label for="firstname">
-                                                Add user
-                                                <input type="text" id="username" name="username" placeholder="@username" required>
-                                            </label>
-                                        </div>
-                                        <button class="secondary" type="submit">+ Add</button>
-                                    </form>
-                                </main>
-                                {FOOTER}
-                              </body
-                             </html>
-                        """)
+            template = env.get_template('edit.html')
+            data = {
+                    "username":username,
+                    "feedname":feedname,
+                    "table":tableContent,
+                    "i":i-1,
+                    "result":result,
+                    "footer":FOOTER
+            }
+            return html(template.render(data=data))
         else:
-            # RETURN ERROR
-            return html(f"""
-                            <html lang="en" data-theme="dark">
-                              <head>
-                                <meta charset="utf-8">
-                                <link rel="stylesheet" href="/static/css/pico.min.css">
-                                <title>My Feeds</title>
-                              </head>
-                              <body>
-                                <main class="container">
-                                    <h2> Hey <a href="/user/{username}"><kbd>{username}</kbd></a> <b>{feedname}</b> is not in your feeds</h2>
-                                </main>
-                              </body
-                             </html>
-                        """)
+            template = env.get_template('error.html')
+            return html(template.render(error="Feed does not exist"))
 
 def validUser(username):
     return (re.match("^[a-z]+?\-+[a-z]+?\-+[a-z]+?\*?$|^\*$", username) and len(username)<31)
@@ -258,7 +204,6 @@ async def user(request, username=None):
     try:
         with open(filename, 'r') as userFeedFile:
             pass
-
     except:
         if validUser(username):
             with open(filename, 'w') as userFeedFile:
@@ -295,7 +240,6 @@ async def user(request, username=None):
                           <a href='/delete/{username}/{feed["name"]}?userAction=True' role='button' class='secondary outline'>Delete Feed</a>
                         </article></a>
                         """
-
         data = {
                 "username":username,
                 "result":result,

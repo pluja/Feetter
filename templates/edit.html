@@ -1,0 +1,41 @@
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="/static/css/pico.min.css">
+    <title>FFN: Edit</title>
+  </head>
+  <body>
+    <main class="container">
+        {% if data['result'] %}
+          <h6 color='green' style='color:green;'> > User deleted.</h6>
+        {% endif %}
+        <hgroup>
+        <h2> Editing <a href="/user/{{data['username']}}"><kbd>{{data['username']}}</kbd></a> '{{data['feedname']}}' feed</h2>
+        <h4> {{data['i']}}/30 users in this feed </h4>
+        </hgroup>
+
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Username</th>
+              <th scope="col">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{data['table'] | safe}}
+          </tbody>
+        </table>
+        <form action="/adduser/{{data['username']}}/{{data['feedname']}}" method="post">
+            <div class="grid">
+                <label for="firstname">
+                    Add user
+                    <input type="text" id="username" name="username" placeholder="@username" required>
+                </label>
+            </div>
+            <button class="secondary" type="submit">+ Add</button>
+        </form>
+    </main>
+    {{data['footer'] | safe}}
+  </body
+</html>
