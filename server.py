@@ -104,13 +104,20 @@ async def handler(request):
                      </html>
                 """)
 
-@app.get("/edit")
+@app.get("/edit", name="edit")
 @app.get("/edit/<username>/<feedname>")
 async def edit(request, username=None, feedname=None):
     if(request.args):
         args = request.args
         username=args.get("username")
         feedname=args.get("feedname")
+        result = args.get("result")
+    else:
+        result = None
+
+    resultHTML = ""
+    if result == "deleted":
+        resultHTML = f"<h6 color='green' style='color:green;'> > User deleted."
 
     feedname = unquote(feedname).replace("+", " ")
     filename = f"data/{username}.json"
@@ -146,7 +153,7 @@ async def edit(request, username=None, feedname=None):
                                     <tr>
                                     <th scope="row">{i}</th>
                                     <td><a href="https://{instance}/{user}" target="_blank">@{user}</a></td>
-                                    <td><a href="/delete/{username}/{feedname}/{user}">❌</a></td>
+                                    <td><a href="/delete/{username}/{feedname}?deleteUser={user}">❌</a></td>
                                     </tr>
                                   """
                     i+=1
@@ -163,6 +170,7 @@ async def edit(request, username=None, feedname=None):
                               </head>
                               <body>
                                 <main class="container">
+                                    {resultHTML}
                                     <hgroup>
                                     <h2> Editing <a href="/user/{username}"><kbd>{username}</kbd></a> '{feedname}' feed</h2>
                                     <h4> {i-1}/30 users in this feed </h4>
@@ -192,6 +200,44 @@ async def edit(request, username=None, feedname=None):
 
 def validUser(username):
     return (re.match("^[a-z]+?\-+[a-z]+?\-+[a-z]+?\*?$|^\*$", username) and len(username)<31)
+
+@app.get("/delete/<username>/<fromFeed>")
+async def delete(request, username=None, fromFeed=None):
+    filename = f"data/{username}.json"
+    toDelete = None
+    args = request.args
+    if(args):
+        toDelete=args.get("deleteUser")
+    try:
+        with open(filename, 'r') as userFeedFile:
+            pass
+    except:
+        url = app.url_for("index", error="username")
+        return redirect(url)
+
+    if toDelete: # We want to dete a user
+        with open(filename, 'r+') as userFeedFile:
+            userFeedJson = json.load(userFeedFile)
+            i = 0
+            for feed in userFeedJson["feeds"]:
+                if feed["name"] == fromFeed and toDelete in feed["users"]:
+                    # Delete user from feed.
+                    feed["users"].pop(feed["users"].index(toDelete))
+                    result="deleted"
+                    if len(feed["users"]) == 0:
+                        userFeedJson["feeds"].pop(i)
+                        result = "feed with 0 users deleted"
+                    # Replace JSON file
+                    userFeedFile.seek(0)
+                    json.dump(userFeedJson, userFeedFile, indent=2)
+                    # Deal with smaller data.
+                    userFeedFile.truncate()
+                    # Return to edit page with success message.
+                    url = app.url_for(f"edit", username=username, feedname=fromFeed, result=result)
+                    return redirect(url)
+                ++i
+    else: #Whole feed
+        return text("This is a whole feed!")
 
 # http://127.0.0.1:8000/user/1234?key1=val1&key2=val2&key3=val3
 @app.get("/user")
@@ -313,15 +359,17 @@ async def newfeed(request, username=None, newFeedName=None, usernames=None):
     if(args):
         username=args.get("username")
         newFeedName=args.get("feedname")
-        newFeedUsers=args.get("usernames").replace("@", "").replace(" ","").split(",")
+        newFeedUsers=args.get("usernames").split(",")
 
     body = unquote(request.body.decode()).split("&")
-    regx = r"[^a-zA-Z0-9-\--\._, ]"
+    regx = r"[^a-zA-Z0-9-\--\._,]"
     newFeedUsers = re.sub(regx, '', body[0].split("=")[1]).split(",")
-    newFeedName = body[1].split("=")[1]
+
+    regx = r"[^a-zA-Z0-9-\--\._,\s]"
+    newFeedName = re.sub(regx, '', body[1].split("=")[1])
 
     dataJson = {
-                  "name":newFeedName.replace("+", " "),
+                  "name":newFeedName,
                   "users":[]
                 }
 
