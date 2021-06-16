@@ -243,7 +243,7 @@ async def user(request, username=None):
         data = {
                 "username":username,
                 "result":result,
-                "feedCards":BeautifulSoup(feedCards),
+                "feedCards":BeautifulSoup(feedCards, features="html5lib"),
                 "footer":FOOTER
         }
         return html(template.render(data=data))
