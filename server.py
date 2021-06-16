@@ -59,11 +59,11 @@ filename = ""
 
 @app.route("/", name="index")
 @app.route("/index", name="index")
-async def handler(request):
+async def index(request):
     template = env.get_template('index.html')
-    #random_username = random_username.generate.generate_username()
     errorHTML = ""
     err = False
+
     if(request.args):
         args = request.args
         err=args.get("error")
@@ -71,13 +71,11 @@ async def handler(request):
     ls = os.listdir('data')
     usercount = len(ls)
 
-    # Generate a random username
     username = petname.Generate(3, "-", 10)
     # If username exists generate another until its unexistent
     while f'{username}.json' in ls:
         username = petname.Generate(3, "-", 10)
 
-    #Main page HTML
     if err:
         data = {'usercount': usercount,
                 'username': username.lower(),
@@ -88,7 +86,6 @@ async def handler(request):
                 'username': username.lower(),
                 'error':False
                }
-
     return html(template.render(data=data))
 
 @app.get("/edit", name="edit")
@@ -382,6 +379,7 @@ async def newfeed(request, username=None, feed=None):
                     # Deal with smaller data.
                     userFeedFile.truncate()
                     url = app.url_for("edit", username=username, feedname=feed, result=f"{newFeedUser} was added.")
+    url = app.url_for("edit", username=username, feedname=feed,result=f"{newFeedUser} not added. Already existing?")
     return redirect(url)
 
 @app.post("/newfeed/<username>")
