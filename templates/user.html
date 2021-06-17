@@ -7,14 +7,15 @@
   <body>
     <main class="container">
         {% if result == 0 %}
-          <h6 color='red' style='color:red;'> > {{data['result']}} </h6>
+          <h6 color='red' style='color:red;'> > Error </h6>
         {%endif%}
         {% if result %}
           <h6 color='green' style='color:green;'> > {{data['result']}} </h6>
         {% endif %}
         <hgroup>
-        <h2> <a href="/user/{{data['username']}}"><kbd>{{data['username']}}</kbd></a> Feeds</h2>
-        <h6 style="font-size: .7em;">*Save your profile with <a href="/user/{{data['username']}}">this link</a></h6>
+          <h2> <a href="/user/{{data['username']}}"><kbd>{{data['username']}}</kbd></a> Feeds</h2>
+          <h6 style="font-size: .7em;">*Save your profile with <a href="/user/{{data['username']}}">this link</a></h6>
+          <h5> <a href="/saved/{{data['username']}}">> Saved</a></h5>
         </hgroup>
 
         <details>
@@ -31,8 +32,8 @@
                   <input type="text" id="feedname" name="feedname" placeholder="Privacy Feed" required>
                 </label>
               </div>
+              <button type="submit" class="contrast">Create</button>
           </form>
-          <button type="submit" class="contrast">Create</button>
         </details>
         {% for card in data['feedCards'] %}
           {{card | safe}}

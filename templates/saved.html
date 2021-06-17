@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="/static/css/pico.min.css">
+  <title>FFN: Saved</title>
+</head>
+<body>
+  <main class="container">
+    <div>
+      {% if data['result'] %}
+        <h6 color='green' style='color:green;'> > {{data['result']}}</h6>
+      {% endif %}
+      <hgroup>
+        <h2><a href="/user/{{data['username']}}"><kbd>{{data['username']}}</kbd></a> saved Tweets</h2>
+      </hgroup>
+    </div>
+    <div class="container">
+      <form action="/savetweet/{{data['username']}}" method="post">
+        <div class="grid">
+          <label for="firstname">
+            Save tweet
+            <input type="text" name="tweetLink" placeholder="https://nitter.instance/user/status/1381041722478759938" required>
+          </label>
+        </div>
+        <button class="secondary" type="submit">v Save</button>
+      </form>
+      <hr>
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">User</th>
+            <th scope="col">Content</th>
+            <th scope="col">Link</th>
+            <th scope="col">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{data['tableContent'] | safe}}
+        </tbody>
+      </table>
+    </div>
+  </main>
+</body>
+</html>

@@ -1,29 +1,30 @@
 # /path/to/server.py
-from sanic import Sanic
+from jinja2 import Environment, PackageLoader
+from datetime import datetime, timedelta
+from urllib.parse import unquote
+
+from sanic.response import redirect
 from sanic.response import text
 from sanic.response import html
-from sanic.response import redirect
-from sanic.response import html
+from sanic import Sanic
 
-from jinja2 import Environment, PackageLoader
 from bs4 import BeautifulSoup
-from simpleicons.all import icons
-
-
+from random import randrange
+import os, os.path
+import petname
+import nitter
 import httpx
 import json
-import os, os.path
 import re
-from random import randrange
-import petname
 
-from urllib.parse import unquote
+
+
+
 
 env = Environment(loader=PackageLoader('server','templates'))
 
-app = Sanic("NitterFeeds")
 
-app = Sanic.get_app("NitterFeeds")
+app = Sanic("NitterFeeds")
 
 FOOTER = f"""<footer class="container">
 <pre>by <a href="https://github.com/pluja">Pluja</a>.</pre> <br>
@@ -33,22 +34,10 @@ FOOTER = f"""<footer class="container">
 </footer>"""
 
 nitterInstances = ["nitter.fdn.fr", "tweet.lambda.dance", "nitter.42l.fr", "nitter.r3d.red", "nitter.eu", "nitter.kavin.rocks"]
-
-sampleFeed = """{
-                  "feeds": [
-                    {
-                      "name": "Example",
-                      "users": [
-                        "monero",
-                        "snowden"
-                      ]
-                    }
-                  ]
-                }"""
+sampleFeed = """{"last-seen": "01/01/2009 08:17:59","feeds": [{"name": "Example", "users": ["monero", "snowden"]}], "saved": []}"""
 
 app.static("/static", "./static")
-
-filename = ""
+#filename = ""
 
 @app.route("/", name="index")
 @app.route("/index", name="index")
@@ -129,7 +118,7 @@ async def edit(request, username=None, feedname=None):
             return html(template.render(data=data))
         else:
             template = env.get_template('error.html')
-            return html(template.render(error="Feed does not exist"))
+            return html(template.render(error="Feed does not exist", ret=f"/edit/{username}"))
 
 def validUser(username):
     return (re.match("^[a-z]+?\-+[a-z]+?\-+[a-z]+?\*?$|^\*$", username) and len(username)<31)
@@ -158,18 +147,21 @@ async def delete(request, username=None, fromFeed=None):
                     # Delete user from feed.
                     feed["users"].pop(feed["users"].index(toDelete))
                     # Set the result status
-                    result="deleted"
                     # If no users in feed, delete the feed
                     if len(feed["users"]) == 0:
                         userFeedJson["feeds"].pop(i)
+                        userFeedFile.seek(0)
+                        json.dump(userFeedJson, userFeedFile)
+                        userFeedFile.truncate()
                         result = "feed with 0 users deleted"
-                    # Replace JSON file
+                        url = app.url_for(f"user", username=username, result=result)
+                        return redirect(url)
+                    # Overwrite Json file
                     userFeedFile.seek(0)
-                    json.dump(userFeedJson, userFeedFile, indent=2)
-                    # Deal with smaller data.
+                    json.dump(userFeedJson, userFeedFile)
                     userFeedFile.truncate()
-                    # Return to edit page with success message.
-                    url = app.url_for(f"edit", username=username, feedname=fromFeed, result=result)
+                    result="deleted"
+                    url = app.url_for("edit", username=username, feedname=fromFeed, result=result)
                     return redirect(url)
                 ++i
     else: #Whole feed
@@ -181,12 +173,12 @@ async def delete(request, username=None, fromFeed=None):
                         userFeedJson["feeds"].remove(feed)
                         # Replace JSON file
                         userFeedFile.seek(0)
-                        json.dump(userFeedJson, userFeedFile, indent=2)
+                        json.dump(userFeedJson, userFeedFile)
                         # Deal with smaller data.
                         userFeedFile.truncate()
                         url = app.url_for(f"user", username=username, result=f"delete {fromFeed} feed OK.")
                         return redirect(url)
-        return text("Oops! Something went wrong! Error in /delete")
+    return text("Oops! Something went wrong! Error in /delete")
 
 # http://127.0.0.1:8000/user/1234?key1=val1&key2=val2&key3=val3
 @app.get("/user")
@@ -197,8 +189,7 @@ async def user(request, username=None):
     result = False
     if(args):
         username=args.get("username")
-        if args.get("result"):
-            result=args.get("result")
+        result=args.get("result")
 
     filename = f"data/{username}.json"
     try:
@@ -208,14 +199,21 @@ async def user(request, username=None):
         if validUser(username):
             with open(filename, 'w') as userFeedFile:
                 userFeedJson = json.loads(sampleFeed)
-                json.dump(userFeedJson, userFeedFile, indent=2)
+                json.dump(userFeedJson, userFeedFile)
         else:
             url = app.url_for("index", error="username")
             return redirect(url)
 
-
-    with open(filename, 'r') as userFeedFile:
+    with open(filename, 'r+') as userFeedFile:
         userFeedJson = json.load(userFeedFile)
+        lastseen = datetime.strptime(userFeedJson["last-seen"],"%d/%m/%Y %H:%M:%S")
+        lastseen += timedelta(minutes=30)
+        if lastseen < datetime.now():
+            userFeedJson["last-seen"] = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+            userFeedFile.seek(0)
+            json.dump(userFeedJson, userFeedFile)
+            userFeedFile.truncate()
+
         feedCards = ""
         for feed in userFeedJson["feeds"]:
             count = 0
@@ -263,12 +261,82 @@ async def newfeed(request, username=None, feed=None):
                     f["users"].append(newFeedUser)
                     # Replace JSON file
                     userFeedFile.seek(0)
-                    json.dump(userFeedJson, userFeedFile, indent=2)
+                    json.dump(userFeedJson, userFeedFile)
                     # Deal with smaller data.
                     userFeedFile.truncate()
-                    url = app.url_for("edit", username=username, feedname=feed, result=f"{newFeedUser} was added.")
+                    url = app.url_for("edit", username=username, feedname=feed, result=f"{newFeedUser} added.")
+                    return redirect(url)
     url = app.url_for("edit", username=username, feedname=feed,result=f"{newFeedUser} not added. Already existing?")
     return redirect(url)
+
+
+
+@app.post("/savetweet/<username>")
+async def saveTweet(request, username=None):
+    body = unquote(request.body.decode())
+    regx = r"[^a-zA-Z0-9-\--\._/:]"
+    url = re.sub(regx, '', body.split("=")[1][:-1])
+    tweet = nitter.parse_nitter_tweet(url)
+
+    filename = f"data/{username}.json"
+    with open(filename, 'r+') as userFeedFile:
+        userFeedJson = json.load(userFeedFile)
+        userFeedJson["saved"].append(tweet)
+        userFeedFile.seek(0)
+        json.dump(userFeedJson, userFeedFile)
+        # Deal with smaller data.
+        userFeedFile.truncate()
+        url = app.url_for("saved", username=username, result=f"Tweet saved.")
+    return redirect(url)
+
+@app.get("/deletesaved/<username>")
+async def saved(request, username=None):
+    tweetId=request.args.get("id")
+    filename = f"data/{username}.json"
+    with open(filename, 'r+') as userFeedFile:
+        userFeedJson = json.load(userFeedFile)
+        for saved in userFeedJson["saved"]:
+            if saved['id'] == tweetId:
+                userFeedJson["saved"].remove(saved)
+                userFeedFile.seek(0)
+                json.dump(userFeedJson, userFeedFile)
+                # Deal with smaller data.
+                userFeedFile.truncate()
+                url = app.url_for("saved", username=username, result=f"Tweet deleted.")
+            else:
+                url = app.url_for("saved", username=username, result=f"Error unknown.")
+        return redirect(url)
+
+
+@app.route("/saved/<username>")
+async def saved(request, username=None):
+    if request.args.get("result"):
+        result=request.args.get("result")
+    else:
+        result = False
+    filename = f"data/{username}.json"
+    template = env.get_template('saved.html')
+    tableContent = ""
+    with open(filename, 'r+') as userFeedFile:
+        userFeedJson = json.load(userFeedFile)
+        divU = '<div style="padding:1em;" class="grid">'
+        divL = '</div>'
+        for saved in userFeedJson["saved"]:
+            ind = userFeedJson["saved"].index(saved)
+            tableContent += f"""
+                            <tr>
+                                <th scope="row">{ind+1}</th>
+                                <td>{saved['username']}</td>
+                                <td>{saved['content']}</td>
+                                <td><a href=https://{nitterInstances[randrange(0, len(nitterInstances))]}{saved['link']} target="_blank"> Nitter </a></td>
+                                <td><a href="/deletesaved/{username}?id={saved['id']}">🗑️</a></td>
+                            </tr>
+                            """
+        data = {"username":username,
+                "tableContent":tableContent,
+                "result":result
+                }
+    return html(template.render(data=data))
 
 @app.post("/newfeed/<username>")
 async def newfeed(request, username=None, newFeedName=None, usernames=None):
@@ -301,7 +369,7 @@ async def newfeed(request, username=None, newFeedName=None, usernames=None):
             userFeedJson["feeds"].append(json.loads(dataJson))
 
             userFeedFile.seek(0)
-            json.dump(userFeedJson, userFeedFile, indent=2)
+            json.dump(userFeedJson, userFeedFile)
             url = app.url_for("user", username=username, result=f"{newFeedName} created")
             return redirect(url)
     except:

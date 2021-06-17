@@ -7,8 +7,11 @@
   <body>
     <header class="container">
         <hgroup>
-          <h2> Seems like something went wrong... </h2>
+          <h2> {{error}} (anymore) </h2>
           <h3 class="contrast"> {{error}} </h3>
+          {% if return %}
+            <a href={{ret}} type="button" class="secondary">Go back</a>
+          {% endif %}
         </hgroup>
         <img style="width:38vw;" src="/static/img/error.png" alt="Error Dinosaur">
     </header>
