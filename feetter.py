@@ -1,5 +1,5 @@
 # /path/to/server.py
-from jinja2 import Environment, PackageLoader
+from jinja2 import Environment, FileSystemLoader
 from datetime import datetime, timedelta
 from urllib.parse import unquote
 
@@ -17,14 +17,14 @@ import httpx
 import json
 import re
 
+base_dir = os.path.abspath(os.path.dirname(__name__))
+static_dir = os.path.join(base_dir, 'static')
+templates_dir = os.path.join(base_dir, 'templates')
+data_dir = os.path.join(base_dir, 'data')
+env = Environment(loader=FileSystemLoader(templates_dir), autoescape=True)
+app = Sanic(__name__)
 
-
-
-
-env = Environment(loader=PackageLoader('server','templates'))
-
-
-app = Sanic("NitterFeeds")
+app.static('/static', static_dir)
 
 FOOTER = f"""<footer class="container">
 <pre>by <a href="https://github.com/pluja">Pluja</a>.</pre> <br>
@@ -36,7 +36,6 @@ FOOTER = f"""<footer class="container">
 nitterInstances = ["nitter.fdn.fr", "tweet.lambda.dance", "nitter.42l.fr", "nitter.r3d.red", "nitter.eu", "nitter.kavin.rocks"]
 sampleFeed = """{"last-seen": "01/01/2009 08:17:59","feeds": [{"name": "Example", "users": ["monero", "snowden"]}], "saved": []}"""
 
-app.static("/static", "./static")
 #filename = ""
 
 @app.route("/", name="index")
@@ -82,7 +81,7 @@ async def edit(request, username=None, feedname=None):
         result = False
 
     feedname = unquote(feedname).replace("+", " ")
-    filename = f"data/{username}.json"
+    filename = f"{data_dir}/{username}.json"
     with open(filename, 'r') as userFeedFile:
         userFeedJson = json.load(userFeedFile)
         ## CHECK IF FEED EXISTS AND GENERATE EDIT TABLE
@@ -113,7 +112,7 @@ async def edit(request, username=None, feedname=None):
                     "table":tableContent,
                     "i":i-1,
                     "result":result,
-                    "footer":FOOTER
+                    "footer":BeautifulSoup(FOOTER)
             }
             return html(template.render(data=data))
         else:
@@ -125,7 +124,7 @@ def validUser(username):
 
 @app.get("/delete/<username>/<fromFeed>")
 async def delete(request, username=None, fromFeed=None):
-    filename = f"data/{username}.json"
+    filename = f"{data_dir}/{username}.json"
     toDelete = None
     args = request.args
     if(args):
@@ -191,7 +190,7 @@ async def user(request, username=None):
         username=args.get("username")
         result=args.get("result")
 
-    filename = f"data/{username}.json"
+    filename = f"{data_dir}/{username}.json"
     try:
         with open(filename, 'r') as userFeedFile:
             pass
@@ -242,7 +241,7 @@ async def user(request, username=None):
                 "username":username,
                 "result":result,
                 "feedCards":BeautifulSoup(feedCards, features="html5lib"),
-                "footer":FOOTER
+                "footer":BeautifulSoup(FOOTER)
         }
         return html(template.render(data=data))
 
@@ -252,7 +251,7 @@ async def newfeed(request, username=None, feed=None):
     regx = r"[^a-zA-Z0-9-\--\._,]"
     newFeedUser = re.sub(regx, '', body.split("=")[1])
 
-    filename = f"data/{username}.json"
+    filename = f"{data_dir}/{username}.json"
     with open(filename, 'r+') as userFeedFile:
         userFeedJson = json.load(userFeedFile)
         for f in userFeedJson["feeds"]:
@@ -278,7 +277,7 @@ async def saveTweet(request, username=None):
     url = re.sub(regx, '', body.split("=")[1][:-1])
     tweet = nitter.parse_nitter_tweet(url)
 
-    filename = f"data/{username}.json"
+    filename = f"{data_dir}/{username}.json"
     with open(filename, 'r+') as userFeedFile:
         userFeedJson = json.load(userFeedFile)
         userFeedJson["saved"].append(tweet)
@@ -292,7 +291,7 @@ async def saveTweet(request, username=None):
 @app.get("/deletesaved/<username>")
 async def saved(request, username=None):
     tweetId=request.args.get("id")
-    filename = f"data/{username}.json"
+    filename = f"{data_dir}/{username}.json"
     with open(filename, 'r+') as userFeedFile:
         userFeedJson = json.load(userFeedFile)
         for saved in userFeedJson["saved"]:
@@ -314,7 +313,7 @@ async def saved(request, username=None):
         result=request.args.get("result")
     else:
         result = False
-    filename = f"data/{username}.json"
+    filename = f"{data_dir}/{username}.json"
     template = env.get_template('saved.html')
     tableContent = ""
     with open(filename, 'r+') as userFeedFile:
@@ -363,7 +362,7 @@ async def newfeed(request, username=None, newFeedName=None, usernames=None):
     dataJson = json.dumps(dataJson)
 
     try:
-        filename = f"data/{username}.json"
+        filename = f"{data_dir}/{username}.json"
         with open(filename, 'r+') as userFeedFile:
             userFeedJson = json.load(userFeedFile)
             userFeedJson["feeds"].append(json.loads(dataJson))
