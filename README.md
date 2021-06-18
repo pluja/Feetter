@@ -23,6 +23,7 @@
 
 ### Run with Docker (Recommended):
 > This run uses Gunicorn, so it is instance-ready.
+> Docker commands may require to use `sudo`
 
 1. Clone this repo.
   - `git clone https://github.com/pluja/Feetter.git`
