@@ -33,6 +33,11 @@
   - `docker run -p 1337:1337 -d --name feetter feetter`
 6. Visit `http://localhost:1337/` and enjoy :)
 
+#### Updating:
+- `cd` into the project directory and run `git pull`
+- `docker stop`
+- Run steps `4` to `6` if you are running Docker.
+
 ## Roadmap
 
 - [x] Delete a feed
