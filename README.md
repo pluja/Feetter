@@ -34,17 +34,17 @@
 > This run uses Gunicorn, so it is instance-ready.
 > Docker commands may require to use `sudo`
 
-1. Clone this repo.
-  - `git clone https://github.com/pluja/Feetter.git`
-3. Install docker.
-4. Run the container:
+1. Install docker.
+2. Pull the image: `docker pull pluja/feetter`
+3. Run the container:
   - `docker run -p 1337:1337 -d --name feetter pluja/feetter`
-5. Visit `http://localhost:1337/` and enjoy :)
+4. Visit `http://localhost:1337/` and enjoy :)
 
 #### Updating
-- `cd` into the project directory and run `git pull`
-- `docker stop`
-- Run steps `4` to `6` if you are running Docker.
+- Run `docker pull pluja/feetter`
+- Run `docker stop feetter`
+- Run `docker rm feetter`
+- Run `docker run -p 1337:1337 -d --name feetter pluja/feetter`
 
 ## Roadmap
 
