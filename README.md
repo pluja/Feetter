@@ -37,11 +37,9 @@
 1. Clone this repo.
   - `git clone https://github.com/pluja/Feetter.git`
 3. Install docker.
-4. Build the Docker image:
-  - `docker build -t feetter .`
-5. Run the container:
-  - `docker run -p 1337:1337 -d --name feetter feetter`
-6. Visit `http://localhost:1337/` and enjoy :)
+4. Run the container:
+  - `docker run -p 1337:1337 -d --name feetter pluja/feetter`
+5. Visit `http://localhost:1337/` and enjoy :)
 
 #### Updating
 - `cd` into the project directory and run `git pull`
