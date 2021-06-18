@@ -1,5 +1,6 @@
-# Feetter: Manager feeds in Nitter
-Create and manage anonymous Nitter feeds with a simple and fast web interface.
+<p align="center"><img width="200" src="misc/logo-with-text.png"></p>
+<p align="center">Create and manage anonymous feeds in <b>Nitter</b> with a simple and fast web interface.</p>
+<p align="center"><a href="https://github.com/pluja">Check out my other privacy projects</a></p>
 
 ## Features:
 - [x] Create and manage Nitter feeds.
