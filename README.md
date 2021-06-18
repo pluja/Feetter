@@ -1,22 +1,23 @@
-# This repo is still Worki-In-Progress! 🕰️
-
-# Feeds-For-Nitter
+# Feetter: Manager feeds in Nitter
 Create and manage anonymous Nitter feeds with a simple and fast web interface.
 
 ## Features:
 - [x] Create and manage Nitter feeds.
-- [x] Directly visit the Nitter feed.
+- [x] Save tweets via URL and display them
+- [x] Directly visit your Nitter feeds.
 - [x] Create as many feeds as you like.
-- [x] Lightweight. Whole app is 140kb.
-- [x] No JS, No Cookies, No tracking. Just a random username.
+- [x] Lightweight.
+- [x] No JS, No Cookies, No tracking.
+- [x] No registration: just a randomly generated username.
 - [x] Multiplatform, syncs everywhere.
 
-## Test it:
+## Install:
 
+### Local run:
 1. Clone this repo.
-2. Install python dependencies.
+2. Install python3 and python dependencies from `requirements.txt`
 3. `mkdir data`
-3. Run `sanic server.app`
+3. Run `sanic feetter.app`
 4. Visit http://127.0.0.1:8000
 
 ## Roadmap
@@ -24,7 +25,6 @@ Create and manage anonymous Nitter feeds with a simple and fast web interface.
 - [x] Delete a feed
 - [x] Edit a feed: Add users
 - [x] Edit a feed: Remove users
-- [x] Save tweets via URL and display them
 - [ ] Edit a feed: Change name
 - [ ] Export data as json file
 - [ ] Import data from json file
