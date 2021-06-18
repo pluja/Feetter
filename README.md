@@ -60,5 +60,7 @@
 ![Sanic](https://img.shields.io/badge/-SANIC-ff69b4?style=for-the-badge)
 ![Jinja2](https://img.shields.io/badge/-Jinja2-B41717?style=for-the-badge&logo=jinja)
 
+> Credit for the logo: https://logodust.com/
+
 
 ## [Support](https://github.com/pluja/pluja/blob/main/SUPPORT.md)
