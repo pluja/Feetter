@@ -2,7 +2,16 @@
 <p align="center">Create and manage anonymous feeds in <b>Nitter</b> with a simple and fast web interface.</p>
 <p align="center"><a href="https://github.com/pluja">Check out my other privacy projects</a></p>
 
-## Features:
+- [Features](#features)
+- [Install](#install)
+  - [Local run](#local-run)
+  - [Run with Docker](#run-with-docker)
+- [Roadmap](#roadmap)
+- [Screenshots](#screenshots)
+- [Built with](#built-with)
+- [Public Instances](#public-instances)
+
+## Features
 - [x] Create and manage Nitter feeds.
 - [x] Save tweets via URL and display them
 - [x] Directly visit your Nitter feeds.
@@ -12,16 +21,16 @@
 - [x] No registration: just a randomly generated username.
 - [x] Multiplatform, syncs everywhere.
 
-## Install:
+## Install
 
-### Local run:
+### Local run
 1. Clone this repo.
 2. Install python3 and python dependencies from `requirements.txt`
 3. `mkdir data`
 3. Run `sanic feetter.app`
 4. Visit http://127.0.0.1:8000
 
-### Run with Docker (Recommended):
+### Run with Docker
 > This run uses Gunicorn, so it is instance-ready.
 > Docker commands may require to use `sudo`
 
@@ -34,7 +43,7 @@
   - `docker run -p 1337:1337 -d --name feetter feetter`
 6. Visit `http://localhost:1337/` and enjoy :)
 
-#### Updating:
+#### Updating
 - `cd` into the project directory and run `git pull`
 - `docker stop`
 - Run steps `4` to `6` if you are running Docker.
@@ -50,12 +59,12 @@
 - [ ] Autodelete empty users
 - [ ] Display feed tweets in app from rss (less data)
 
-## Screenshots:
+## Screenshots
 
-### Create new feed:
+### Create new feed
 ![Create new feed](https://i.imgur.com/aWziQfG.png)
 
-#### My Feeds page:
+#### My Feeds page
 ![My Feeds](https://i.imgur.com/MrzVpyt.png)
 
 
@@ -70,3 +79,7 @@
 
 
 ## [Support](https://github.com/pluja/pluja/blob/main/SUPPORT.md)
+### Public Instances
+| Instance	| Server	|
+|-	|-	|
+| [feetter.r3d.red](feetter.r3d.red) 	| 🇩🇪 	|
