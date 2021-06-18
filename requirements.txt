@@ -2,3 +2,6 @@ petname
 httpx
 sanic
 jinja2
+bs4
+html5lib
+lxml
