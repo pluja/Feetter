@@ -20,6 +20,18 @@ Create and manage anonymous Nitter feeds with a simple and fast web interface.
 3. Run `sanic feetter.app`
 4. Visit http://127.0.0.1:8000
 
+### Run with Docker (Recommended):
+> This run uses Gunicorn, so it is instance-ready.
+
+1. Clone this repo.
+  - `git clone https://github.com/pluja/Feetter.git`
+3. Install docker.
+4. Build the Docker image:
+  - `docker build -t feetter .`
+5. Run the container:
+  - `docker run -p 1337:1337 -d --name feetter feetter`
+6. Visit `http://localhost:1337/` and enjoy :)
+
 ## Roadmap
 
 - [x] Delete a feed
