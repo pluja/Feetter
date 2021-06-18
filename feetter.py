@@ -49,7 +49,7 @@ async def index(request):
         args = request.args
         err=args.get("error")
 
-    ls = os.listdir('data')
+    ls = os.listdir(data_dir)
     usercount = len(ls)
 
     username = petname.Generate(3, "-", 10)
