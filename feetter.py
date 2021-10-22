@@ -52,10 +52,10 @@ async def index(request):
     ls = os.listdir(data_dir)
     usercount = len(ls)
 
-    username = petname.Generate(3, "-", 10)
+    username = petname.Generate(2, "-", 10)
     # If username exists generate another until its unexistent
     while f'{username}.json' in ls:
-        username = petname.Generate(3, "-", 10)
+        username = petname.Generate(2, "-", 10)
 
     if err:
         data = {'usercount': usercount,
@@ -120,7 +120,7 @@ async def edit(request, username=None, feedname=None):
             return html(template.render(error="Feed does not exist", ret=f"/edit/{username}"))
 
 def validUser(username):
-    return (re.match("^[a-z]+?\-+[a-z]+?\-+[a-z]+?\*?$|^\*$", username) and len(username)<31)
+    return (re.match("^[a-z]+?\-+[a-z]+?\*?$|^\*$", username) and len(username)<31)
 
 @app.get("/delete/<username>/<fromFeed>")
 async def delete(request, username=None, fromFeed=None):
