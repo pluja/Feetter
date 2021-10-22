@@ -52,7 +52,7 @@
 - [x] Delete a feed
 - [x] Edit a feed: Add users
 - [x] Edit a feed: Remove users
-- [ ] Optimize for small screens.
+- [x] Optimize for small screens.
 - [ ] Edit a feed: Change name
 - [ ] Export data as json file
 - [ ] Import data from json file
