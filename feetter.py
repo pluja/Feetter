@@ -33,7 +33,7 @@ FOOTER = f"""<footer class="container">
     <b style="font-size:.6em; color:#FEAC48;"> <mark>₿ (btc):</mark> bc1qnrh67j3q0y8kzsxl9npgrlqhalcgx4awa3j2u0</b><br>
 </footer>"""
 
-nitterInstances = ["nitter.fdn.fr", "tweet.lambda.dance", "nitter.42l.fr", "nitter.r3d.red", "nitter.eu", "nitter.kavin.rocks"]
+nitterInstances = ["nitter.fdn.fr", "nitter.42l.fr", "nt.r3d.red", "nitter.kavin.rocks"]
 sampleFeed = """{"last-seen": "01/01/2009 08:17:59","feeds": [{"name": "Example", "users": ["monero", "snowden"]}], "saved": []}"""
 
 #filename = ""
