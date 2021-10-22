@@ -16,10 +16,11 @@
 - [x] Save tweets via URL and display them
 - [x] Directly visit your Nitter feeds.
 - [x] Create as many feeds as you like.
-- [x] Lightweight.
+- [x] Lightweight and fast.
 - [x] No JS, No Cookies, No tracking.
 - [x] No registration: just a randomly generated username.
 - [x] Multiplatform, syncs everywhere.
+- [x] Optimized for small screens. 
 
 ## Install
 
